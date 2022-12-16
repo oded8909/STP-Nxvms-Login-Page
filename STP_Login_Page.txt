@@ -1,0 +1,154 @@
+Nxvms Login page STP: 				 QA Engineer Oded Azulay
+
+Overview:
+The scope of this test plan is to identify the items to be tested, features, types of testing to be performed for nxvms login page.
+
+
+Objectives:
+UI verifications
+DB verifications
+Functional tests
+
+
+#	Objectives	Test Item 	Requirement Coverage 
+1.	UI verifications	Verify text visibility on the headline of the login window – “Log in to Nx Witness Cloud”
+Verify login window size
+Verify login window location on the screen
+Verify visibility and location of Log in button 
+Verify visibility and location of Email text field
+Verify visibility and location of Password text field
+Verify visibility and location of Remember me checkbox	According to provided document from BA/Product
+Items to be tested:
+#	Objectives	Test Item 	Requirement Coverage 
+1.	UI verifications	Verify text visibility on the headline of the login window – “Log in to Nx Witness Cloud”.
+Verify login window size.
+Verify login window location on the screen.
+Verify visibility and location of Log in button.
+Verify visibility and location of Email text field.
+Verify visibility and location of Password text field.
+Verify visibility and location of Remember me checkbox.
+Verify visibility and location of Forgot password link field.
+Verify text size, style and color is according to requirement	According to provided document from BA/Product
+2. 	DB verifications	Verify existence of table – USERS (made up table).
+Verify USERS table columns and allowed values (numeric, alphanumeric, etc…).
+Verify USERS.LOGGED_IN flag = 1 when user successfully logged in.
+Verify USERS.SUSPENDED = 1 when user unsuccessfully logged in after 3 tries.	According to provided document from BA/Product
+3.	Functional tests	Happy flow – type valid Email and Password values that exists in DB, check the “Remember me” checkbox, and click on the Log in button, verify user navigates to the correct window and logged in.
+Remember me functionality - type valid Email and Password values that exists in DB, check the “Remember me” checkbox, and click on the Log in button, now log off and open the login window again, verify the Email value is automatically populated.
+Forgot password functionality – Click on “Forgot Password” and verify the functionality of Forgot password is working according to requirement.
+Negative flows:
+Type Email and password that does not exist on DB and click log in button, verify expected results according to document.
+Type integers on the Email text box and click on the log in button, make sure sending request to server is not allowed.
+Mandatory fields test - Perform log in attempt without values on the Email and Password text fields.
+Mandatory fields test - Perform log in attempt with value only on the Email text field.
+Mandatory fields test - Perform log in attempt with value only on the Password text field.
+Verify login window available on different browsers (Chrome, Edge, IE, Firefox, etc..).
+Verify exiting the login window is operational.
+Verify multiple logins for the same user from different machines is not possible.
+Verify log in of user via web service is operational (in case it is exists).
+Verify user is blocked after 3 unsuccessful attempts.
+Modify language to Hebrew and open the log in window, verify the log in window language is on Hebrew now.
+Verify navigation between the text fields with Tab key on keyboard is available.
+Verify error message displayed when exceeding the allowed characters length on each text field.
+After successfully login, verify closing the browser will not logout the user.	According to provided document from BA/Product
+
+
+
+Bug report:
+Issue - NVMX Login Page – User is not suspended after 3 unsuccessful attempts.  
+Priority – High
+Severity – High
+Version – 1.0.0.0
+
+Steps to reproduce:
+Go to nxvms.com.
+Click on the Log in button on the top right corner of the screen.
+On the log in window, type oded8909@hotmail.com on the Email text field
+Type 11112222 on the password text field
+Click on Log in button on the button of the window.
+Repeat steps 3 – 5 three more times.
+
+Expected results:
+Error message should appear “the user is suspended, please contact us in order to unlock it at xxxxx@gmail.com”
+And USERS.SUSPENDED value should be 1 for oded8909@hotmail.com user.
+
+Actual results:
+Error message appear “Wrong Password” and USERS.SUSPENDED = 0 for oded8909@hotmail.com user.
+Logs, traces and screen capture attached.
+Automation code for successful login
+/*The below code will open https://nxvms.com/”); navigate to login screen, perform *successful login and assert successful login was done.*/
+import org.testng.Assert;
+…… (all imports should be done here)
+public class LoginSuccessful {
+public static void main (String[] args) throws InterruptedException {
+String user = “oded8909@hotmail.com”;
+String password = “CorrectPass”;
+String accountEmail;
+WebDriver driver = new ChromeDriver();
+System.setProperty("webdriver.chrome.driver","C:\\ Project\\src\\Drivers\\chromedriver.exe");
+        //Open browser page with URL https://nxvms.com
+        driver.get(“https://nxvms.com/”);
+        //Find Log in button element
+        driver.findElement(By.class("btn btn-default btn-collapse")).click();
+        //Change focus to the Log in window
+        for (String iterator : driver.getWindowHandles()) {
+            driver.switchTo().window(iterator);}
+        //Find Email text field and type the Email address
+        driver.findElement(By.id("login_email")).sendKeys(user);
+       //Find Password text field and type the correct Password
+        driver.findElement(By.id("login_password")).sendKeys(password);
+       //Find Log in button and click on it
+        driver.findElement(By.class("btn btn-primary")).click();
+       //Change focus to the Main window
+        for (String iterator : driver.getWindowHandles()) {
+            driver.switchTo().window(iterator);}
+       //Get Email address after log in was done for assertion purpose
+       accountEmail  = driver.findElement(By.class("ellipsis")).getText();
+ //Perform assertion, compare between the Email addresses
+Assert.assertEquals(accountEmail  , user, "Login Failed, Test case failed”);
+//Close driver
+driver.close();
+}
+}
+* please note, this code was not compiled so probably there are errors.
+
+Automation code for un successful login attempt
+/*The below code will open https://nxvms.com/”); navigate to login screen, perform *un successful login attempt and assert the relevant error message appear to the user.*/
+import org.testng.Assert;
+…… (all imports should be done here)
+public class LoginNotSuccessful {
+public static void main (String[] args) throws InterruptedException {
+String user = “oded8909@hotmail.com”;
+String password = “IncorrectPass”;
+String errorMessage;
+WebDriver driver = new ChromeDriver();
+System.setProperty("webdriver.chrome.driver","C:\\ Project\\src\\Drivers\\chromedriver.exe");
+        //Open browser page with URL https://nxvms.com
+        driver.get(“https://nxvms.com/”);
+        //Find Log in button element
+        driver.findElement(By.class("btn btn-default btn-collapse")).click();
+        //Change focus to the Log in window
+        for (String iterator : driver.getWindowHandles()) {
+            driver.switchTo().window(iterator);}
+       //Find Email text field and type the Email address
+        driver.findElement(By.id("login_email")).sendKeys(user);
+       //Find Password text field and type the incorrect Password
+        driver.findElement(By.id("login_password")).sendKeys(password);
+       //Find Log in button and click on it
+        driver.findElement(By.class("btn btn-primary")).click();
+      //Check if error message element available
+      if(driver.findElements(By.class("input-error ng-star-inserted")).size() != 0){
+      //Copy error message string to  errorMessage variable
+      errorMessage = driver.findElement(By.class("input-error ng-star-inserted")).            getText();
+      Assert.assertEquals(“Wrong password”  , errorMessage, "Different Than Expected Error Message Appear”);
+      //Error message element is not available
+      Else
+     Assert.fail("Error Message Element is Not Available");
+    driver.close();}
+    }
+}* please note, this code was not compiled so probably there are errors.
+
+
+ 
+
+      
